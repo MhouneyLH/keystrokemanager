@@ -10,14 +10,14 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:keystrokemanager.helloWorld"
+    "onStartupFinished"
   ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "keystrokemanager.helloWorld",
-        "title": "Hello World"
+        "command": "keystrokemanager.showTotalKeystrokes",
+        "title": "Keystrokes: Show total"
       }
     ]
   },

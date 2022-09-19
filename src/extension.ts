@@ -1,26 +1,25 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
+let statusBarItem: vscode.StatusBarItem;
+let totalKeystrokes : number = 0;
+
+export function activate({ subscriptions }: vscode.ExtensionContext) {
+	const commandId = 'keystrokemanager.showTotalKeystrokes';
+	subscriptions.push(vscode.commands.registerCommand(commandId, () => {
+		vscode.window.showInformationMessage(`Total Keystrokes: ${totalKeystrokes}`);
+	}));
 	
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "keystrokemanager" is now active!');
+	const ITEM_PRIORITY = 1000;
+	statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, ITEM_PRIORITY);
+	statusBarItem.command = commandId;
+	subscriptions.push(statusBarItem);
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('keystrokemanager.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from KeystrokeManager!');
-	});
+	subscriptions.push(vscode.window.onDidChangeTextEditorSelection(updateStatusBarItem));
 
-	context.subscriptions.push(disposable);
+	updateStatusBarItem();
 }
 
-// this method is called when your extension is deactivated
-export function deactivate() {}
+function updateStatusBarItem(): void {
+	statusBarItem.text = `Keystrokes: ${++totalKeystrokes}`;
+	statusBarItem.show();
+}
