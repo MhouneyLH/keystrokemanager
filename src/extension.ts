@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 
 let statusBarItem: vscode.StatusBarItem;
-let totalKeystrokes : number = 0;
+let totalKeystrokes = 0;
 
 export function activate({ subscriptions }: vscode.ExtensionContext) {
 	const commandId = 'keystrokemanager.showTotalKeystrokes';
@@ -14,12 +14,14 @@ export function activate({ subscriptions }: vscode.ExtensionContext) {
 	statusBarItem.command = commandId;
 	subscriptions.push(statusBarItem);
 
-	subscriptions.push(vscode.window.onDidChangeTextEditorSelection(updateStatusBarItem));
+	subscriptions.push(vscode.workspace.onDidChangeTextDocument((event: vscode.TextDocumentChangeEvent) => updateStatusBarItem(event)));
 
-	updateStatusBarItem();
+	statusBarItem.show();
 }
 
-function updateStatusBarItem(): void {
-	statusBarItem.text = `Keystrokes: ${++totalKeystrokes}`;
-	statusBarItem.show();
+function updateStatusBarItem(event: vscode.TextDocumentChangeEvent): void {
+	if(event && event.contentChanges) {
+		totalKeystrokes++;
+		statusBarItem.text = `Keystrokes: ${totalKeystrokes}`;
+	}
 }
