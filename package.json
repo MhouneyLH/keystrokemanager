@@ -16,8 +16,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "keystrokemanager.showTotalKeystrokes",
-        "title": "Keystrokes: Show total"
+        "command": "keystrokemanager.showKeystrokeCountAnalytics",
+        "title": "Keystrokes: Show Count-Analytics"
       },
       {
         "command": "keystrokemanager.mostOftenPressedKeys",

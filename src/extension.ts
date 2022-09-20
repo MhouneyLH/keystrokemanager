@@ -42,8 +42,8 @@ let amountOfKeystrokesInTimespanMap = new Map<string, KeystrokeData>([
 ]);
 
 export function activate({ subscriptions }: vscode.ExtensionContext) {
-	const showTotalKeystrokesCommandId = 'keystrokemanager.showTotalKeystrokes';
-	subscriptions.push(vscode.commands.registerCommand(showTotalKeystrokesCommandId, () => {
+	const showKeystrokecountAnalyticsCommandId = 'keystrokemanager.showKeystrokecountAnalytics';
+	subscriptions.push(vscode.commands.registerCommand(showKeystrokecountAnalyticsCommandId, () => {
 		vscode.window.showInformationMessage(`😊 ${getPraisingWord()}! You typed ${amountOfKeystrokesInTimespanMap.get('total')} characters already!`);
 	}));
 
@@ -57,7 +57,7 @@ export function activate({ subscriptions }: vscode.ExtensionContext) {
 	
 	const ITEM_PRIORITY = 101;
 	statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, ITEM_PRIORITY);
-	statusBarItem.command = showTotalKeystrokesCommandId;
+	statusBarItem.command = showKeystrokecountAnalyticsCommandId;
 	statusBarItem.text = `${KEYBOARD_ICON} Keystrokes: ${amountOfKeystrokesInTimespanMap.get('total')}`;
 	statusBarItem.tooltip = 'Select Timespan';
 	statusBarItem.show();
