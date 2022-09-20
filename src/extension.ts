@@ -45,7 +45,13 @@ export function activate({ subscriptions }: vscode.ExtensionContext) {
 	const showKeystrokeCountAnalyticsCommandId = 'keystrokemanager.showKeystrokeCountAnalytics';
 	subscriptions.push(vscode.commands.registerCommand(showKeystrokeCountAnalyticsCommandId, () => {
 		const map = amountOfKeystrokesInTimespanMap;
-		const message = `You collected so far ${map.get('total')?.keystrokeCount} keystrokes in total. ${map.get('year')?.keystrokeCount} of them this year, ${map.get('month')?.keystrokeCount} this month, ${map.get('week')?.keystrokeCount} this week, ${map.get('day')?.keystrokeCount} today, ${map.get('hour')?.keystrokeCount} this hour and ${map.get('minute')?.keystrokeCount} this minute!`;
+		const message = `You collected so far ${map.get('total')?.keystrokeCount} keystrokes in total.
+						 ${map.get('year')?.keystrokeCount} of them this year, 
+						 ${map.get('month')?.keystrokeCount} this month, 
+						 ${map.get('week')?.keystrokeCount} this week, 
+						 ${map.get('day')?.keystrokeCount} today, 
+						 ${map.get('hour')?.keystrokeCount} this hour and 
+						 ${map.get('minute')?.keystrokeCount} this minute!`;
 
 		vscode.window.showInformationMessage(`😊 ${getPraisingWord()}! ${message}`);
 	}));
@@ -102,7 +108,7 @@ function getMostOftenPressedKeys(): Map<string, number> {
 }
 
 function printMostOftenPressedKeysMessage(keyMap: Map<string, number>): string {
-	const messageBeginning = new String('You pressed ');
+	const messageBeginning = new String('You pressed');
 	let result = messageBeginning;
 
 	// @todo: beautify this code-piece!!! disgusting!
@@ -114,9 +120,10 @@ function printMostOftenPressedKeysMessage(keyMap: Map<string, number>): string {
 	let placement = 1;
 	
 	keyMap.forEach((value, key, map) => {
-		const placementLine = new String(`${placementIcons.get(placement++)} '${key}' ${value} times  `);
+		const placementLine = new String(` ${placementIcons.get(placement++)} '${key}' ${value} times`);
 		result += placementLine.toString();
 	});
+	result += '!';
 
 	return result.toString();
 }
