@@ -2,6 +2,9 @@ import * as vscode from 'vscode';
 import * as moment from 'moment';
 
 const KEYBOARD_ICON = '$(keyboard)';
+const FIRST_PLACE_ICON = '🥇';
+const SECOND_PLACE_ICON = '🥈';
+const THIRD_PLACE_ICON = '🥉';
 const KEYSTROKE_DEFAULT_VALUE = 0;
 
 /// general @todos:
@@ -101,9 +104,9 @@ function printMostOftenPressedKeysMessage(keyMap: Map<string, number>): string {
 
 	// @todo: beautify this code-piece!!! disgusting!
 	const placementIcons = new Map<number, string>([
-		[1, '🥇'],
-		[2, '🥈'],
-		[3, '🥉'],
+		[1, FIRST_PLACE_ICON],
+		[2, SECOND_PLACE_ICON],
+		[3, THIRD_PLACE_ICON],
 	]);
 	let placement = 1;
 	
