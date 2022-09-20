@@ -42,9 +42,12 @@ let amountOfKeystrokesInTimespanMap = new Map<string, KeystrokeData>([
 ]);
 
 export function activate({ subscriptions }: vscode.ExtensionContext) {
-	const showKeystrokecountAnalyticsCommandId = 'keystrokemanager.showKeystrokecountAnalytics';
-	subscriptions.push(vscode.commands.registerCommand(showKeystrokecountAnalyticsCommandId, () => {
-		vscode.window.showInformationMessage(`😊 ${getPraisingWord()}! You typed ${amountOfKeystrokesInTimespanMap.get('total')} characters already!`);
+	const showKeystrokeCountAnalyticsCommandId = 'keystrokemanager.showKeystrokeCountAnalytics';
+	subscriptions.push(vscode.commands.registerCommand(showKeystrokeCountAnalyticsCommandId, () => {
+		const map = amountOfKeystrokesInTimespanMap;
+		const message = `You collected so far ${map.get('total')?.keystrokeCount} keystrokes in total. ${map.get('year')?.keystrokeCount} of them this year, ${map.get('month')?.keystrokeCount} this month, ${map.get('week')?.keystrokeCount} this week, ${map.get('day')?.keystrokeCount} today, ${map.get('hour')?.keystrokeCount} this hour and ${map.get('minute')?.keystrokeCount} this minute!`;
+
+		vscode.window.showInformationMessage(`😊 ${getPraisingWord()}! ${message}`);
 	}));
 
 	const mostOftenPressedKeysCommandId = 'keystrokemanager.mostOftenPressedKeys';
@@ -57,8 +60,8 @@ export function activate({ subscriptions }: vscode.ExtensionContext) {
 	
 	const ITEM_PRIORITY = 101;
 	statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, ITEM_PRIORITY);
-	statusBarItem.command = showKeystrokecountAnalyticsCommandId;
-	statusBarItem.text = `${KEYBOARD_ICON} Keystrokes: ${amountOfKeystrokesInTimespanMap.get('total')}`;
+	statusBarItem.command = showKeystrokeCountAnalyticsCommandId;
+	statusBarItem.text = `${KEYBOARD_ICON} Keystrokes: ${amountOfKeystrokesInTimespanMap.get('total')?.keystrokeCount}`;
 	statusBarItem.tooltip = 'Select Timespan';
 	statusBarItem.show();
 	subscriptions.push(statusBarItem);
@@ -76,7 +79,7 @@ function updateStatusBarItem(event: vscode.TextDocumentChangeEvent): void {
 			isTimespanAgo(value.date, key) && key !== 'total' ? map.set(key, new KeystrokeData(new Date(), KEYSTROKE_DEFAULT_VALUE))
 															  : map.set(key, new KeystrokeData(value.date, value.keystrokeCount + 1))
 		);  
-		statusBarItem.text = `${KEYBOARD_ICON} Keystrokes: ${amountOfKeystrokesInTimespanMap.get('total')}`;
+		statusBarItem.text = `${KEYBOARD_ICON} Keystrokes: ${amountOfKeystrokesInTimespanMap.get('total')?.keystrokeCount}`;
 
 		collectPressedKey(event);
 	}
