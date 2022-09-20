@@ -18,6 +18,10 @@
       {
         "command": "keystrokemanager.showTotalKeystrokes",
         "title": "Keystrokes: Show total"
+      },
+      {
+        "command": "keystrokemanager.mostOftenPressedKeys",
+        "title": "Keystrokes: Show most often pressed Keys"
       }
     ]
   },
