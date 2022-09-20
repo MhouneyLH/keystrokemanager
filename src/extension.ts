@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 const KEYBOARD_ICON = '$(keyboard)';
 
 let statusBarItem: vscode.StatusBarItem;
-let totalKeystrokes = -1; // -1 instead of 0, because otherwise it starts with 2, when one key was pressed
+let totalKeystrokes = 0; // -1 instead of 0, because otherwise it starts with 2, when one key was pressed
 let pressedKeyMap = new Map<string, number>();
 
 export function activate({ subscriptions }: vscode.ExtensionContext) {
@@ -15,7 +15,7 @@ export function activate({ subscriptions }: vscode.ExtensionContext) {
 	const mostOftenPressedKeysCommandId = 'keystrokemanager.mostOftenPressedKeys';
 	subscriptions.push(vscode.commands.registerCommand(mostOftenPressedKeysCommandId, () => {
 		const mostOftenPressedKeys = getMostOftenPressedKeys();
-		const message = getMostOftenPressedKeysMessage(mostOftenPressedKeys);
+		const message = printMostOftenPressedKeysMessage(mostOftenPressedKeys);
 
 		vscode.window.showInformationMessage(message);
 	}));
@@ -23,7 +23,8 @@ export function activate({ subscriptions }: vscode.ExtensionContext) {
 	const ITEM_PRIORITY = 101;
 	statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, ITEM_PRIORITY);
 	statusBarItem.command = showTotalKeystrokesCommandId;
-	statusBarItem.text = `${KEYBOARD_ICON} Keystrokes: ${totalKeystrokes + 1}`;
+	statusBarItem.text = `${KEYBOARD_ICON} Keystrokes: ${totalKeystrokes}`;
+	statusBarItem.tooltip = 'Select Timespan';
 	statusBarItem.show();
 	
 	subscriptions.push(statusBarItem);
@@ -32,16 +33,21 @@ export function activate({ subscriptions }: vscode.ExtensionContext) {
 }
 
 function updateStatusBarItem(event: vscode.TextDocumentChangeEvent): void {
-	if(event && event.contentChanges) {
+	// the last check is because of the first change in the document at the beginning 
+	// -> counted instantly to 2 before
+	if(event &&
+	   event.contentChanges &&
+	   event.contentChanges[0].text !== undefined) {
 		totalKeystrokes++;
 		statusBarItem.text = `${KEYBOARD_ICON} Keystrokes: ${totalKeystrokes}`;
 		
-		collectPressedKeys(event);
+		collectPressedKey(event);
 	}
 }
 
-function collectPressedKeys(event: vscode.TextDocumentChangeEvent): void {
+function collectPressedKey(event: vscode.TextDocumentChangeEvent): void {
 	const pressedKey = event.contentChanges[0].text;
+	// 0, as default value, when key was not pressed yet
 	const prevCount = pressedKeyMap.get(pressedKey) ?? 0;
 
 	pressedKeyMap.set(pressedKey, prevCount + 1);
@@ -56,7 +62,7 @@ function getMostOftenPressedKeys(): Map<string, number> {
 	return mostOftenPressedKeys;
 }
 
-function getMostOftenPressedKeysMessage(keyMap: Map<string, number>): string {
+function printMostOftenPressedKeysMessage(keyMap: Map<string, number>): string {
 	const messageBeginning = new String('Most often pressed keys: ');
 	let result = messageBeginning;
 
