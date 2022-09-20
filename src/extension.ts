@@ -8,7 +8,7 @@ let pressedKeyMap = new Map<string, number>();
 export function activate({ subscriptions }: vscode.ExtensionContext) {
 	const showTotalKeystrokesCommandId = 'keystrokemanager.showTotalKeystrokes';
 	subscriptions.push(vscode.commands.registerCommand(showTotalKeystrokesCommandId, () => {
-		vscode.window.showInformationMessage(`Total Keystrokes: ${totalKeystrokes}`);
+		vscode.window.showInformationMessage(`😊 ${getPraisingWord()} You typed ${totalKeystrokes} characters already!`);
 	}));
 
 	const mostOftenPressedKeysCommandId = 'keystrokemanager.mostOftenPressedKeys';
@@ -72,4 +72,9 @@ function getMostOftenPressedKeysMessage(keyMap: Map<string, number>): string {
 	});
 
 	return result.toString();
+}
+
+function getPraisingWord(): string {
+	const words = ['Awesome!', 'Wonderful!', 'Great!', 'Fantastic!', 'Cool!'];
+	return words[Math.floor(Math.random() * words.length)];
 }
