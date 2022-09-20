@@ -4,7 +4,18 @@ import * as moment from 'moment';
 const KEYBOARD_ICON = '$(keyboard)';
 const KEYSTROKE_DEFAULT_VALUE = 0;
 
-class Test {
+/// general @todos:
+// - comment functions
+// - refactor code (with Neo for the best result I guess)
+// - create project-structure
+// - write read-me
+// - write changelog
+// - add cicd to project on github
+// - add keystrokes per min / hour, etc. feature
+// - add feature to display the whole analytics of which keys were pressed in a json-file or something like this
+// - add feature to the keystroke-counts, etc.
+
+class KeystrokeData {
 	date: Date;
 	keystrokeCount: number;
 
@@ -15,26 +26,22 @@ class Test {
 }
 
 let statusBarItem: vscode.StatusBarItem;
-let totalKeystrokes = KEYSTROKE_DEFAULT_VALUE; // -1 instead of 0, because otherwise it starts with 2, when one key was pressed
 let pressedKeyMap = new Map<string, number>();
-// @todo: add totalKeystrokes in this map
-let amountOfKeystrokesInTimespanMap = new Map<string, Test>([
-	['second', new Test(new Date(), KEYSTROKE_DEFAULT_VALUE)],
-	['minute', new Test(new Date(), KEYSTROKE_DEFAULT_VALUE)],
-	['hour', new Test(new Date(), KEYSTROKE_DEFAULT_VALUE)],
-	['day', new Test(new Date(), KEYSTROKE_DEFAULT_VALUE)],
-	['week', new Test(new Date(), KEYSTROKE_DEFAULT_VALUE)],
-	['month', new Test(new Date(), KEYSTROKE_DEFAULT_VALUE)],
-	['year', new Test(new Date(), KEYSTROKE_DEFAULT_VALUE)],
-	// ['total', KEYSTROKE_DEFAULT_VALUE],
+let amountOfKeystrokesInTimespanMap = new Map<string, KeystrokeData>([
+	['second', new KeystrokeData(new Date(), KEYSTROKE_DEFAULT_VALUE)],
+	['minute', new KeystrokeData(new Date(), KEYSTROKE_DEFAULT_VALUE)],
+	['hour', new KeystrokeData(new Date(), KEYSTROKE_DEFAULT_VALUE)],
+	['day', new KeystrokeData(new Date(), KEYSTROKE_DEFAULT_VALUE)],
+	['week', new KeystrokeData(new Date(), KEYSTROKE_DEFAULT_VALUE)],
+	['month', new KeystrokeData(new Date(), KEYSTROKE_DEFAULT_VALUE)],
+	['year', new KeystrokeData(new Date(), KEYSTROKE_DEFAULT_VALUE)],
+	['total', new KeystrokeData(new Date(), KEYSTROKE_DEFAULT_VALUE)],
 ]);
-
-let hourTimer = new Date();
 
 export function activate({ subscriptions }: vscode.ExtensionContext) {
 	const showTotalKeystrokesCommandId = 'keystrokemanager.showTotalKeystrokes';
 	subscriptions.push(vscode.commands.registerCommand(showTotalKeystrokesCommandId, () => {
-		vscode.window.showInformationMessage(`😊 ${getPraisingWord()}! You typed ${totalKeystrokes} characters already!`);
+		vscode.window.showInformationMessage(`😊 ${getPraisingWord()}! You typed ${amountOfKeystrokesInTimespanMap.get('total')} characters already!`);
 	}));
 
 	const mostOftenPressedKeysCommandId = 'keystrokemanager.mostOftenPressedKeys';
@@ -48,7 +55,7 @@ export function activate({ subscriptions }: vscode.ExtensionContext) {
 	const ITEM_PRIORITY = 101;
 	statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, ITEM_PRIORITY);
 	statusBarItem.command = showTotalKeystrokesCommandId;
-	statusBarItem.text = `${KEYBOARD_ICON} Keystrokes: ${totalKeystrokes}`;
+	statusBarItem.text = `${KEYBOARD_ICON} Keystrokes: ${amountOfKeystrokesInTimespanMap.get('total')}`;
 	statusBarItem.tooltip = 'Select Timespan';
 	statusBarItem.show();
 	subscriptions.push(statusBarItem);
@@ -62,18 +69,12 @@ function updateStatusBarItem(event: vscode.TextDocumentChangeEvent): void {
 	if(event &&
 	   event.contentChanges &&
 	   event.contentChanges[0].text !== undefined) {
-		totalKeystrokes++;
-		statusBarItem.text = `${KEYBOARD_ICON} Keystrokes: ${totalKeystrokes}`;
+		amountOfKeystrokesInTimespanMap.forEach((value, key, map) => 	
+			isTimespanAgo(value.date, key) && key !== 'total' ? map.set(key, new KeystrokeData(new Date(), KEYSTROKE_DEFAULT_VALUE))
+															  : map.set(key, new KeystrokeData(value.date, value.keystrokeCount + 1))
+		);  
+		statusBarItem.text = `${KEYBOARD_ICON} Keystrokes: ${amountOfKeystrokesInTimespanMap.get('total')}`;
 
-		amountOfKeystrokesInTimespanMap.forEach((value, key, map) => {
-			map.set(key, new Test(value.date, value.keystrokeCount + 1));
-
-			if(isTimespanAgo(value.date, key)) {
-				map.set(key, new Test(new Date(), KEYSTROKE_DEFAULT_VALUE));
-			}
-			console.log(`${key}: ${value.keystrokeCount}; `);
-		});
-		
 		collectPressedKey(event);
 	}
 }
@@ -98,6 +99,7 @@ function printMostOftenPressedKeysMessage(keyMap: Map<string, number>): string {
 	const messageBeginning = new String('You pressed ');
 	let result = messageBeginning;
 
+	// @todo: beautify this code-piece!!! disgusting!
 	const placementIcons = new Map<number, string>([
 		[1, '🥇'],
 		[2, '🥈'],
