@@ -1,5 +1,6 @@
-import { prependListener } from 'process';
 import * as vscode from 'vscode';
+
+const KEYBOARD_ICON = '$(keyboard)';
 
 let statusBarItem: vscode.StatusBarItem;
 let totalKeystrokes = -1; // -1 instead of 0, because otherwise it starts with 2, when one key was pressed
@@ -22,7 +23,7 @@ export function activate({ subscriptions }: vscode.ExtensionContext) {
 	const ITEM_PRIORITY = 101;
 	statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, ITEM_PRIORITY);
 	statusBarItem.command = showTotalKeystrokesCommandId;
-	statusBarItem.text = `Keystrokes: ${totalKeystrokes + 1}`;
+	statusBarItem.text = `${KEYBOARD_ICON} Keystrokes: ${totalKeystrokes + 1}`;
 	statusBarItem.show();
 	
 	subscriptions.push(statusBarItem);
@@ -33,7 +34,7 @@ export function activate({ subscriptions }: vscode.ExtensionContext) {
 function updateStatusBarItem(event: vscode.TextDocumentChangeEvent): void {
 	if(event && event.contentChanges) {
 		totalKeystrokes++;
-		statusBarItem.text = `Keystrokes: ${totalKeystrokes}`;
+		statusBarItem.text = `${KEYBOARD_ICON} Keystrokes: ${totalKeystrokes}`;
 		
 		collectPressedKeys(event);
 	}
