@@ -4,18 +4,21 @@ import { KEYSTROKE_DEFAULT_VALUE,
          KEYBOARD_ICON, FIRST_ICON, SECOND_ICON, THIRD_ICON } from "./constants";
 import { statusBarItem, pressedKeyMap, amountsOfKeystrokes, wpmWords, wordsPerMinute } from "./extension";
 
-export function updateStatusBarItem(event: vscode.TextDocumentChangeEvent): void {
-	// the last check is because of the first change in the document at the beginning 
-	// -> counted instantly to 2 before
-	if(event &&
-	   event.contentChanges &&
-	   event.contentChanges[0].text !== undefined) {
-		amountsOfKeystrokes.forEach((value, key, map) => map.set(key, value + 1));	
-		statusBarItem.text = `${KEYBOARD_ICON} Keystrokes: ${amountsOfKeystrokes.get('total')} | ${wordsPerMinute} WPM`;
+export const updateStatusBarItem = () => {
+    statusBarItem.text = `${KEYBOARD_ICON} Keystrokes: ${amountsOfKeystrokes.get('total')} | ${wordsPerMinute} WPM`;
+};
 
-		collectPressedKey(event);
-	}
+export function incrementKeystrokes(): void {
+	amountsOfKeystrokes.forEach((value, key, map) => map.set(key, value + 1));	
 }
+
+export const isValidChangedContent = (event: vscode.TextDocumentChangeEvent) => {
+    // the last check is because of the first change in the document at the beginning 
+	// -> counted instantly to 2 before
+    return event &&
+           event.contentChanges &&
+           event.contentChanges[0].text !== undefined;
+};
 
 export function collectPressedKey(event: vscode.TextDocumentChangeEvent): void {
 	const pressedKey = event.contentChanges[0].text;
@@ -45,7 +48,7 @@ export const printMostOftenPressedKeysMessage = (keyMap: Map<string, number>) =>
 	]);
 	let placement = 1;
 	
-	keyMap.forEach((value, key, map) => {
+	keyMap.forEach((value, key) => {
 		const placementLine = new String(` ${placementIcons.get(placement++)} '${key}' ${value} times`);
 		result += placementLine.toString();
 	});

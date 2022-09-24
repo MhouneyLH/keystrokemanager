@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import { KEYSTROKE_DEFAULT_VALUE,
 		 KEYBOARD_ICON,
 		 SECOND_AS_MILLISECONDS, MINUTE_AS_MILLISECONDS, HOUR_AS_MILLISECONDS, DAY_AS_MILLISECONDS, WEEK_AS_MILLISECONDS, MONTH_AS_MILLISECONDS, YEAR_AS_MILLISECONDS } from "./constants";
-import { updateStatusBarItem, getMostOftenPressedKeys, getPraisingWord, printMostOftenPressedKeysMessage, resetOneAmountOfKeystrokes, getAverageWordsPerMinute } from './methods';
+import { updateStatusBarItem, getMostOftenPressedKeys, getPraisingWord, printMostOftenPressedKeysMessage, resetOneAmountOfKeystrokes, getAverageWordsPerMinute, isValidChangedContent, collectPressedKey, incrementKeystrokes} from './methods';
 import { setLongInterval } from './utils';
 
 export let statusBarItem: vscode.StatusBarItem;
@@ -66,5 +66,11 @@ export function activate({ subscriptions }: vscode.ExtensionContext) {
 	setLongInterval(() => resetOneAmountOfKeystrokes('month'), MONTH_AS_MILLISECONDS);
 	setLongInterval(() => resetOneAmountOfKeystrokes('year'), YEAR_AS_MILLISECONDS);
 	
-	subscriptions.push(vscode.workspace.onDidChangeTextDocument((event: vscode.TextDocumentChangeEvent) => updateStatusBarItem(event)));
+	subscriptions.push(vscode.workspace.onDidChangeTextDocument((event: vscode.TextDocumentChangeEvent) => {
+		if(isValidChangedContent(event)) {
+			incrementKeystrokes();
+			updateStatusBarItem();
+			collectPressedKey(event);
+		}
+	} ));
 }
