@@ -1,11 +1,22 @@
 import * as vscode from 'vscode';
-import * as moment from 'moment';
 
+// General
+const KEYSTROKE_DEFAULT_VALUE = 0;
+
+// Icons
 const KEYBOARD_ICON = '$(keyboard)';
 const FIRST_PLACE_ICON = '🥇';
 const SECOND_PLACE_ICON = '🥈';
 const THIRD_PLACE_ICON = '🥉';
-const KEYSTROKE_DEFAULT_VALUE = 0;
+
+// Time
+const SECOND_AS_MILLISECONDS = 1000;
+const MINUTE_AS_MILLISECONDS = SECOND_AS_MILLISECONDS * 60;
+const HOUR_AS_MILLISECONDS = MINUTE_AS_MILLISECONDS * 60;
+const DAY_AS_MILLISECONDS = HOUR_AS_MILLISECONDS * 24;
+const WEEK_AS_MILLISECONDS = DAY_AS_MILLISECONDS * 7;
+const MONTH_AS_MILLISECONDS = DAY_AS_MILLISECONDS * 30; // @todo: could be problematic
+const YEAR_AS_MILLISECONDS = MONTH_AS_MILLISECONDS * 12;
 
 /// general @todos:
 // - comment functions
@@ -18,40 +29,32 @@ const KEYSTROKE_DEFAULT_VALUE = 0;
 // - add feature to display the whole analytics of which keys were pressed in a json-file or something like this
 // - add feature to the keystroke-counts, etc.
 
-class KeystrokeData {
-	date: Date;
-	keystrokeCount: number;
-
-	constructor(date: Date, keystrokeCount: number) {
-		this.date = date;
-		this. keystrokeCount = keystrokeCount;
-	}
-}
-
 let statusBarItem: vscode.StatusBarItem;
 let pressedKeyMap = new Map<string, number>();
-let amountOfKeystrokesInTimespanMap = new Map<string, KeystrokeData>([
-	['second', new KeystrokeData(new Date(), KEYSTROKE_DEFAULT_VALUE)],
-	['minute', new KeystrokeData(new Date(), KEYSTROKE_DEFAULT_VALUE)],
-	['hour', new KeystrokeData(new Date(), KEYSTROKE_DEFAULT_VALUE)],
-	['day', new KeystrokeData(new Date(), KEYSTROKE_DEFAULT_VALUE)],
-	['week', new KeystrokeData(new Date(), KEYSTROKE_DEFAULT_VALUE)],
-	['month', new KeystrokeData(new Date(), KEYSTROKE_DEFAULT_VALUE)],
-	['year', new KeystrokeData(new Date(), KEYSTROKE_DEFAULT_VALUE)],
-	['total', new KeystrokeData(new Date(), KEYSTROKE_DEFAULT_VALUE)],
+let amountsOfKeystrokes = new Map<string, number>([
+	['second', KEYSTROKE_DEFAULT_VALUE],
+	['minute', KEYSTROKE_DEFAULT_VALUE],
+	['hour', KEYSTROKE_DEFAULT_VALUE],
+	['day', KEYSTROKE_DEFAULT_VALUE],
+	['week', KEYSTROKE_DEFAULT_VALUE],
+	['month', KEYSTROKE_DEFAULT_VALUE],
+	['year', KEYSTROKE_DEFAULT_VALUE],
+	['total', KEYSTROKE_DEFAULT_VALUE],
 ]);
+let wpmWords = new Array<number>();
+let wordsPerMinute = 0;
 
 export function activate({ subscriptions }: vscode.ExtensionContext) {
 	const showKeystrokeCountAnalyticsCommandId = 'keystrokemanager.showKeystrokeCountAnalytics';
 	subscriptions.push(vscode.commands.registerCommand(showKeystrokeCountAnalyticsCommandId, () => {
-		const map = amountOfKeystrokesInTimespanMap;
-		const message = `You collected so far ${map.get('total')?.keystrokeCount} keystrokes in total.
-						 ${map.get('year')?.keystrokeCount} of them this year, 
-						 ${map.get('month')?.keystrokeCount} this month, 
-						 ${map.get('week')?.keystrokeCount} this week, 
-						 ${map.get('day')?.keystrokeCount} today, 
-						 ${map.get('hour')?.keystrokeCount} this hour and 
-						 ${map.get('minute')?.keystrokeCount} this minute!`;
+		const map = amountsOfKeystrokes;
+		const message = `You collected so far ${map.get('total')} keystrokes in total.
+						 ${map.get('year')} of them this year, 
+						 ${map.get('month')} this month, 
+						 ${map.get('week')} this week, 
+						 ${map.get('day')} today, 
+						 ${map.get('hour')} this hour and 
+						 ${map.get('minute')} this minute!`;
 
 		vscode.window.showInformationMessage(`😊 ${getPraisingWord()}! ${message}`);
 	}));
@@ -67,10 +70,36 @@ export function activate({ subscriptions }: vscode.ExtensionContext) {
 	const ITEM_PRIORITY = 101;
 	statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, ITEM_PRIORITY);
 	statusBarItem.command = showKeystrokeCountAnalyticsCommandId;
-	statusBarItem.text = `${KEYBOARD_ICON} Keystrokes: ${amountOfKeystrokesInTimespanMap.get('total')?.keystrokeCount}`;
+	statusBarItem.text = `${KEYBOARD_ICON} Keystrokes: ${amountsOfKeystrokes.get('total')}`;
 	statusBarItem.tooltip = 'Select Timespan';
 	statusBarItem.show();
 	subscriptions.push(statusBarItem);
+
+	setInterval(() => {
+		const keystrokesPerSecond = amountsOfKeystrokes.get('second');
+
+		if(keystrokesPerSecond !== undefined) {
+			// keystrokesPerSecond / 5 -> one word is on average 5 chars long
+			// [...] * 60 -> estimation, that this rate is for the next 60 seconds
+			const tempWordsPerMinute = (keystrokesPerSecond / 5) * 60;
+			if(wpmWords.length === 60) {
+				wpmWords.shift();
+			}
+			wpmWords.push(tempWordsPerMinute);
+	
+			wordsPerMinute = wpmWords.reduce((prev, curr) => prev + curr) / wpmWords.length;
+			statusBarItem.text = `${KEYBOARD_ICON} Keystrokes: ${amountsOfKeystrokes.get('total')} | ${wordsPerMinute} WPM`;
+		}
+
+		resetOneAmountOfKeystrokes('second');
+	}, SECOND_AS_MILLISECONDS);
+
+	setInterval(() => resetOneAmountOfKeystrokes('minute'), MINUTE_AS_MILLISECONDS);
+	setInterval(() => resetOneAmountOfKeystrokes('hour'), HOUR_AS_MILLISECONDS);
+	setInterval(() => resetOneAmountOfKeystrokes('day'), DAY_AS_MILLISECONDS);
+	setInterval(() => resetOneAmountOfKeystrokes('week'), WEEK_AS_MILLISECONDS);
+	setInterval(() => resetOneAmountOfKeystrokes('month'), MONTH_AS_MILLISECONDS);
+	setInterval(() => resetOneAmountOfKeystrokes('year'), YEAR_AS_MILLISECONDS);
 
 	subscriptions.push(vscode.workspace.onDidChangeTextDocument((event: vscode.TextDocumentChangeEvent) => updateStatusBarItem(event)));
 }
@@ -81,11 +110,8 @@ function updateStatusBarItem(event: vscode.TextDocumentChangeEvent): void {
 	if(event &&
 	   event.contentChanges &&
 	   event.contentChanges[0].text !== undefined) {
-		amountOfKeystrokesInTimespanMap.forEach((value, key, map) => 	
-			isTimespanAgo(value.date, key) && key !== 'total' ? map.set(key, new KeystrokeData(new Date(), KEYSTROKE_DEFAULT_VALUE))
-															  : map.set(key, new KeystrokeData(value.date, value.keystrokeCount + 1))
-		);  
-		statusBarItem.text = `${KEYBOARD_ICON} Keystrokes: ${amountOfKeystrokesInTimespanMap.get('total')?.keystrokeCount}`;
+		amountsOfKeystrokes.forEach((value, key, map) => map.set(key, value + 1));	
+		statusBarItem.text = `${KEYBOARD_ICON} Keystrokes: ${amountsOfKeystrokes.get('total')} | ${wordsPerMinute} WPM`;
 
 		collectPressedKey(event);
 	}
@@ -133,10 +159,6 @@ function getPraisingWord(): string {
 	return WORDS[Math.floor(Math.random() * WORDS.length)];
 }
 
-function isTimespanAgo(date: Date, timespan: string) {
-	// here it is everytime 1 hour, 1 day, etc.
-	const AMOUNT_OF_TIMESPAN = 1;
-	const timeSpanConvertedIntoCorrectFormat: moment.unitOfTime.DurationConstructor = timespan as moment.DurationInputArg2; 
-	
-	return moment(date).isBefore(moment().subtract(AMOUNT_OF_TIMESPAN, timeSpanConvertedIntoCorrectFormat));
+function resetOneAmountOfKeystrokes(key: string): void {
+	amountsOfKeystrokes.set(key, KEYSTROKE_DEFAULT_VALUE);
 }
