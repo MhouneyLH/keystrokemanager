@@ -25,7 +25,6 @@ const YEAR_AS_MILLISECONDS = MONTH_AS_MILLISECONDS * 12;
 // - write read-me
 // - write changelog
 // - add cicd to project on github
-// - add keystrokes per min / hour, etc. feature
 // - add feature to display the whole analytics of which keys were pressed in a json-file or something like this
 // - add feature to the keystroke-counts, etc.
 
@@ -98,9 +97,9 @@ export function activate({ subscriptions }: vscode.ExtensionContext) {
 	setInterval(() => resetOneAmountOfKeystrokes('hour'), HOUR_AS_MILLISECONDS);
 	setInterval(() => resetOneAmountOfKeystrokes('day'), DAY_AS_MILLISECONDS);
 	setInterval(() => resetOneAmountOfKeystrokes('week'), WEEK_AS_MILLISECONDS);
-	setInterval(() => resetOneAmountOfKeystrokes('month'), MONTH_AS_MILLISECONDS);
-	setInterval(() => resetOneAmountOfKeystrokes('year'), YEAR_AS_MILLISECONDS);
-
+	setLongInterval(() => resetOneAmountOfKeystrokes('month'), MONTH_AS_MILLISECONDS);
+	setLongInterval(() => resetOneAmountOfKeystrokes('year'), YEAR_AS_MILLISECONDS);
+	
 	subscriptions.push(vscode.workspace.onDidChangeTextDocument((event: vscode.TextDocumentChangeEvent) => updateStatusBarItem(event)));
 }
 
@@ -159,6 +158,23 @@ function getPraisingWord(): string {
 	return WORDS[Math.floor(Math.random() * WORDS.length)];
 }
 
+const setLongInterval = (callback: any, timeout: number) => {
+    let count = 0;
+    const MAX_32_BIT_SIGNED = 2147483647;
+    const maxIterations = timeout / MAX_32_BIT_SIGNED;
+
+    const onInterval = () => {
+        ++count;
+        if (count > maxIterations) {
+            count = 0;
+            callback();
+        }
+    };
+
+    return setInterval(onInterval, Math.min(timeout, MAX_32_BIT_SIGNED));
+};
+
 function resetOneAmountOfKeystrokes(key: string): void {
+	console.log("here: " + key);
 	amountsOfKeystrokes.set(key, KEYSTROKE_DEFAULT_VALUE);
 }
