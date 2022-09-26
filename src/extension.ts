@@ -7,8 +7,8 @@ import { updateStatusBarItem, getMostOftenPressedKeys, getPraisingWord, printMos
 import { setLongInterval } from './utils';
 
 export let statusBarItem: vscode.StatusBarItem;
-export let pressedKeyMap = new Map<string, number>();
-export let amountsOfKeystrokes = new Map<string, number>([
+export const pressedKeyMap = new Map<string, number>();
+export const amountsOfKeystrokes = new Map<string, number>([
 	['second', KEYSTROKE_DEFAULT_VALUE],
 	['minute', KEYSTROKE_DEFAULT_VALUE],
 	['hour', KEYSTROKE_DEFAULT_VALUE],
@@ -18,10 +18,20 @@ export let amountsOfKeystrokes = new Map<string, number>([
 	['year', KEYSTROKE_DEFAULT_VALUE],
 	['total', KEYSTROKE_DEFAULT_VALUE],
 ]);
-export let wpmWords = new Array<number>();
+export const wpmWords = new Array<number>();
 export let wordsPerMinute = 0;
 
-export function activate({ subscriptions }: vscode.ExtensionContext) {
+// interface für Datenstruktur von map verwenden
+// damit kann ich das auch in json speichern
+// test = {
+// 	key: 5;
+// };
+// test['key'];
+
+// arrow functions in normal functions
+// json für Konstanten
+
+export function activate({ subscriptions }: vscode.ExtensionContext): void {
 	const showKeystrokeCountAnalyticsCommandId = 'keystrokemanager.showKeystrokeCountAnalytics';
 	subscriptions.push(vscode.commands.registerCommand(showKeystrokeCountAnalyticsCommandId, () => {
 		const map = amountsOfKeystrokes;

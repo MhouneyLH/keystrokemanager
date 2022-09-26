@@ -1,10 +1,10 @@
-export const setLongInterval = (callback: any, timeout: number) => {
+export function setLongInterval(callback: any, timeout: number): any {
     let count = 0;
     const MAX_32_BIT_SIGNED = 2147483647;
     const maxIterations = timeout / MAX_32_BIT_SIGNED;
 
     const onInterval = () => {
-        ++count;
+        count++;
         if (count > maxIterations) {
             count = 0;
             callback();
