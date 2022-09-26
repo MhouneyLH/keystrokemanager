@@ -16,12 +16,12 @@
   "contributes": {
     "commands": [
       {
-        "command": "keystrokemanager.showKeystrokeCountAnalytics",
+        "command": "keystrokemanager.keystrokeCountAnalytics",
         "title": "Keystrokes: Show Count-Analytics"
       },
       {
         "command": "keystrokemanager.mostOftenPressedKeys",
-        "title": "Keystrokes: Show most often pressed Keys"
+        "title": "Keystrokes: Show most often pressed keys"
       }
     ]
   },

@@ -28,59 +28,64 @@ export let wordsPerMinute = 0;
 // };
 // test['key'];
 
-// arrow functions in normal functions
 // json für Konstanten
 
 export function activate({ subscriptions }: vscode.ExtensionContext): void {
-	const showKeystrokeCountAnalyticsCommandId = 'keystrokemanager.showKeystrokeCountAnalytics';
-	subscriptions.push(vscode.commands.registerCommand(showKeystrokeCountAnalyticsCommandId, () => {
-		const map = amountsOfKeystrokes;
-		const message = `You collected so far ${map.get('total')} keystrokes in total.
-						 ${map.get('year')} of them this year, 
-						 ${map.get('month')} this month, 
-						 ${map.get('week')} this week, 
-						 ${map.get('day')} today, 
-						 ${map.get('hour')} this hour and 
-						 ${map.get('minute')} this minute!`;
-
-		vscode.window.showInformationMessage(`😊 ${getPraisingWord()}! ${message}`);
-	}));
-
+	const keystrokeCountAnalyticsCommandId = 'keystrokemanager.keystrokeCountAnalytics';
 	const mostOftenPressedKeysCommandId = 'keystrokemanager.mostOftenPressedKeys';
-	subscriptions.push(vscode.commands.registerCommand(mostOftenPressedKeysCommandId, () => {
-		const mostOftenPressedKeys = getMostOftenPressedKeys();
-		const message = printMostOftenPressedKeysMessage(mostOftenPressedKeys);
-
-		vscode.window.showInformationMessage(message);
-	}));
 	
-	const ITEM_PRIORITY = 101;
-	statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, ITEM_PRIORITY);
-	statusBarItem.command = showKeystrokeCountAnalyticsCommandId;
+	subscriptions.push(vscode.commands.registerCommand(keystrokeCountAnalyticsCommandId, keystrokeCountAnalyticsCommand));
+	subscriptions.push(vscode.commands.registerCommand(mostOftenPressedKeysCommandId, mostOftenPressedKeysCommand));
+	
+	const STATUS_BAR_ITEM_PRIORITY = 101;
+	statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, STATUS_BAR_ITEM_PRIORITY);
+	statusBarItem.command = keystrokeCountAnalyticsCommandId;
 	statusBarItem.text = `${KEYBOARD_ICON} Keystrokes: ${amountsOfKeystrokes.get('total')}`;
 	statusBarItem.tooltip = 'Select Timespan';
 	statusBarItem.show();
+
 	subscriptions.push(statusBarItem);
+	
+	subscriptions.push(vscode.workspace.onDidChangeTextDocument(update));
 
 	setInterval(() => {
 		wordsPerMinute = getAverageWordsPerMinute();
-		statusBarItem.text = `${KEYBOARD_ICON} Keystrokes: ${amountsOfKeystrokes.get('total')} | ${wordsPerMinute} WPM`;
+		updateStatusBarItem();
 
 		resetOneAmountOfKeystrokes('second');
 	}, SECOND_AS_MILLISECONDS);
-
 	setInterval(() => resetOneAmountOfKeystrokes('minute'), MINUTE_AS_MILLISECONDS);
 	setInterval(() => resetOneAmountOfKeystrokes('hour'), HOUR_AS_MILLISECONDS);
 	setInterval(() => resetOneAmountOfKeystrokes('day'), DAY_AS_MILLISECONDS);
 	setInterval(() => resetOneAmountOfKeystrokes('week'), WEEK_AS_MILLISECONDS);
 	setLongInterval(() => resetOneAmountOfKeystrokes('month'), MONTH_AS_MILLISECONDS);
 	setLongInterval(() => resetOneAmountOfKeystrokes('year'), YEAR_AS_MILLISECONDS);
-	
-	subscriptions.push(vscode.workspace.onDidChangeTextDocument((event: vscode.TextDocumentChangeEvent) => {
-		if(isValidChangedContent(event)) {
-			incrementKeystrokes();
-			updateStatusBarItem();
-			collectPressedKey(event);
-		}
-	} ));
+}
+
+function keystrokeCountAnalyticsCommand(): void {
+	const map = amountsOfKeystrokes;
+	const message = `You collected so far ${map.get('total')} keystrokes in total.
+					${map.get('year')} of them this year, 
+					${map.get('month')} this month, 
+					${map.get('week')} this week, 
+					${map.get('day')} today, 
+					${map.get('hour')} this hour and 
+					${map.get('minute')} this minute!`;
+
+	vscode.window.showInformationMessage(`😊 ${getPraisingWord()}! ${message}`);
+}
+
+function mostOftenPressedKeysCommand(): void {
+	const mostOftenPressedKeys = getMostOftenPressedKeys();	
+	const message = printMostOftenPressedKeysMessage(mostOftenPressedKeys);
+
+	vscode.window.showInformationMessage(message);
+}
+
+function update(event: vscode.TextDocumentChangeEvent): void {
+	if(isValidChangedContent(event)) {
+		incrementKeystrokes();
+		updateStatusBarItem();
+		collectPressedKey(event);
+	}
 }
