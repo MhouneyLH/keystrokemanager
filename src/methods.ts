@@ -1,13 +1,15 @@
 import * as vscode from 'vscode';
 
-import { KEYSTROKE_DEFAULT_VALUE,
+import { KEYSTROKE_DEFAULT_VALUE, KEYSTROKE_ERROR_VALUE,
          KEYBOARD_ICON, FIRST_ICON, SECOND_ICON, THIRD_ICON } from "./constants";
-import { statusBarItem, pressedKeyMap, amountsOfKeystrokes, wpmWords, wordsPerMinute } from "./extension";
+import { statusBarItem, pressedKeyMap, amountsOfKeystrokes, wpmWords } from "./extension";
 
 // das file hier aufspalten in mehrere Dateien innerhalb eines Unterordners
+var lastWordsPerMinuteValue = 0;
 
-export function updateStatusBarItem(): void {
-    statusBarItem.text = `${KEYBOARD_ICON} Keystrokes: ${amountsOfKeystrokes.get('total')} | ${wordsPerMinute} WPM`;
+export function updateStatusBarItem(keystrokesValue: number = KEYSTROKE_ERROR_VALUE, wordsPerMinute: number = lastWordsPerMinuteValue): void {
+    statusBarItem.text = `${KEYBOARD_ICON} Keystrokes: ${keystrokesValue} | ${wordsPerMinute} WPM`;
+    lastWordsPerMinuteValue = wordsPerMinute;
 }
 
 export function incrementKeystrokes(): void {

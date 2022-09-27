@@ -1,5 +1,6 @@
 // General
 export const KEYSTROKE_DEFAULT_VALUE = 0;
+export const KEYSTROKE_ERROR_VALUE = -1;
 
 // Icons
 export const KEYBOARD_ICON = '$(keyboard)';

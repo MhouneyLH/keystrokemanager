@@ -18,8 +18,8 @@ export const amountsOfKeystrokes = new Map<string, number>([
 	['year', KEYSTROKE_DEFAULT_VALUE],
 	['total', KEYSTROKE_DEFAULT_VALUE],
 ]);
+// hier vielleicht so machen, das restliche Sachen mit average aufgefüllt werden
 export const wpmWords = new Array<number>();
-export let wordsPerMinute = 0;
 
 // interface für Datenstruktur von map verwenden
 // damit kann ich das auch in json speichern
@@ -41,17 +41,18 @@ export function activate({ subscriptions }: vscode.ExtensionContext): void {
 	statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, STATUS_BAR_ITEM_PRIORITY);
 	statusBarItem.command = keystrokeCountAnalyticsCommandId;
 	statusBarItem.text = `${KEYBOARD_ICON} Keystrokes: ${amountsOfKeystrokes.get('total')}`;
+	// @todo: add this in future
 	statusBarItem.tooltip = 'Select Timespan';
 	statusBarItem.show();
 
 	subscriptions.push(statusBarItem);
 	
 	subscriptions.push(vscode.workspace.onDidChangeTextDocument(update));
-
+	
 	setInterval(() => {
-		wordsPerMinute = getAverageWordsPerMinute();
-		updateStatusBarItem();
-
+		const wordsPerMinute = getAverageWordsPerMinute();
+		updateStatusBarItem(amountsOfKeystrokes.get('total'), wordsPerMinute);
+		
 		resetOneAmountOfKeystrokes('second');
 	}, SECOND_AS_MILLISECONDS);
 	setInterval(() => resetOneAmountOfKeystrokes('minute'), MINUTE_AS_MILLISECONDS);
@@ -62,7 +63,7 @@ export function activate({ subscriptions }: vscode.ExtensionContext): void {
 	setLongInterval(() => resetOneAmountOfKeystrokes('year'), YEAR_AS_MILLISECONDS);
 }
 
-function keystrokeCountAnalyticsCommand(): void {
+export function keystrokeCountAnalyticsCommand(): void {
 	const map = amountsOfKeystrokes;
 	const message = `You collected so far ${map.get('total')} keystrokes in total.
 					${map.get('year')} of them this year, 
@@ -75,17 +76,17 @@ function keystrokeCountAnalyticsCommand(): void {
 	vscode.window.showInformationMessage(`😊 ${getPraisingWord()}! ${message}`);
 }
 
-function mostOftenPressedKeysCommand(): void {
+export function mostOftenPressedKeysCommand(): void {
 	const mostOftenPressedKeys = getMostOftenPressedKeys();	
 	const message = printMostOftenPressedKeysMessage(mostOftenPressedKeys);
 
 	vscode.window.showInformationMessage(message);
 }
 
-function update(event: vscode.TextDocumentChangeEvent): void {
+export function update(event: vscode.TextDocumentChangeEvent): void {
 	if(isValidChangedContent(event)) {
 		incrementKeystrokes();
-		updateStatusBarItem();
+		updateStatusBarItem(amountsOfKeystrokes.get('total'));
 		collectPressedKey(event);
 	}
 }
