@@ -1,14 +1,14 @@
-// General
+// general
 export const KEYSTROKE_DEFAULT_VALUE = 0;
 export const KEYSTROKE_ERROR_VALUE = -1;
 
-// Icons
+// icons
 export const KEYBOARD_ICON = '$(keyboard)';
 export const FIRST_ICON = '🥇';
 export const SECOND_ICON = '🥈';
 export const THIRD_ICON = '🥉';
 
-// Time
+// time
 export const SECOND_AS_MILLISECONDS = 1000;
 export const MINUTE_AS_MILLISECONDS = SECOND_AS_MILLISECONDS * 60;
 export const HOUR_AS_MILLISECONDS = MINUTE_AS_MILLISECONDS * 60;
