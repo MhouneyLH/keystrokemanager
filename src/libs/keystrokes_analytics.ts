@@ -3,6 +3,9 @@ import * as vscode from 'vscode';
 import { KEYSTROKE_DEFAULT_VALUE,
          FIRST_ICON, SECOND_ICON, THIRD_ICON, } from "../constants";
 
+// @todo: using interfaces instead of maps
+const pressedKeyMap = new Map<string, number>();
+
 export function printMostOftenPressedKeysMessage(keyMap: Map<string, number>): string {
 	const messageBeginning = new String('You pressed ');
 	let result = messageBeginning;
