@@ -18,8 +18,6 @@ export const amountsOfKeystrokes = new Map<string, number>([
 	['year', KEYSTROKE_DEFAULT_VALUE],
 	['total', KEYSTROKE_DEFAULT_VALUE],
 ]);
-// hier vielleicht so machen, das restliche Sachen mit average aufgefüllt werden
-export const wpmWords = new Array<number>();
 
 // interface für Datenstruktur von map verwenden
 // damit kann ich das auch in json speichern
@@ -90,3 +88,16 @@ export function update(event: vscode.TextDocumentChangeEvent): void {
 		collectPressedKey(event);
 	}
 }
+
+export function updateStatusBarItem(keystrokesValue: number = KEYSTROKE_ERROR_VALUE, wordsPerMinute: number = lastWordsPerMinuteValue): void {
+    statusBarItem.text = `${KEYBOARD_ICON} Keystrokes: ${keystrokesValue} | ${wordsPerMinute} WPM`;
+    lastWordsPerMinuteValue = wordsPerMinute;
+}
+
+export function isValidChangedContent(event: vscode.TextDocumentChangeEvent): boolean {
+    // the last check is because of the first change in the document at the beginning 
+	// -> counted instantly to 2 before
+    return event &&
+           event.contentChanges &&
+           event.contentChanges[0].text !== undefined;
+};

@@ -1,3 +1,9 @@
+export function getPraisingWord(): string {
+	const WORDS = ['Awesome', 'Wonderful', 'Great', 'Fantastic', 'Cool'];
+
+	return WORDS[Math.floor(Math.random() * WORDS.length)];
+}
+
 export function setLongInterval(callback: any, timeout: number): any {
     let count = 0;
     const MAX_32_BIT_SIGNED = 2147483647;
