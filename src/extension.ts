@@ -2,9 +2,9 @@ import * as vscode from 'vscode';
 
 import { KEYSTROKE_DEFAULT_VALUE,
 		 KEYBOARD_ICON,
-		 SECOND_AS_MILLISECONDS, MINUTE_AS_MILLISECONDS, HOUR_AS_MILLISECONDS, DAY_AS_MILLISECONDS, WEEK_AS_MILLISECONDS, MONTH_AS_MILLISECONDS, YEAR_AS_MILLISECONDS } from "./constants";
-import { updateStatusBarItem, getMostOftenPressedKeys, getPraisingWord, printMostOftenPressedKeysMessage, resetOneAmountOfKeystrokes, getAverageWordsPerMinute, isValidChangedContent, collectPressedKey, incrementKeystrokes} from './methods';
-import { setLongInterval } from './utils';
+		 SECOND_AS_MILLISECONDS, MINUTE_AS_MILLISECONDS, HOUR_AS_MILLISECONDS, DAY_AS_MILLISECONDS, WEEK_AS_MILLISECONDS, MONTH_AS_MILLISECONDS, YEAR_AS_MILLISECONDS, } from "./constants";
+import { getPraisingWord, setLongInterval, } from './utils';
+import { getAverageWordsPerMinute, } from './libs/words_per_minute';
 
 export let statusBarItem: vscode.StatusBarItem;
 export const pressedKeyMap = new Map<string, number>();
@@ -48,7 +48,7 @@ export function activate({ subscriptions }: vscode.ExtensionContext): void {
 	subscriptions.push(vscode.workspace.onDidChangeTextDocument(update));
 	
 	setInterval(() => {
-		const wordsPerMinute = getAverageWordsPerMinute();
+		const wordsPerMinute = getAverageWordsPerMinute(pressedKeyMap);
 		updateStatusBarItem(amountsOfKeystrokes.get('total'), wordsPerMinute);
 		
 		resetOneAmountOfKeystrokes('second');
