@@ -1,180 +1,68 @@
 import * as vscode from 'vscode';
 
-// General
-const KEYSTROKE_DEFAULT_VALUE = 0;
+import { KEYBOARD_ICON,
+		 SECOND_AS_MILLISECONDS, MINUTE_AS_MILLISECONDS, HOUR_AS_MILLISECONDS, DAY_AS_MILLISECONDS, WEEK_AS_MILLISECONDS, MONTH_AS_MILLISECONDS, YEAR_AS_MILLISECONDS, } from "./constants";
+import { getPraisingWord, setLongInterval, } from './utils';
+import { updateStatusBarItem, isValidChangedContent, } from './vscode_utils';
+import { getAverageWordsPerMinute, } from './libs/words_per_minute';
+import { amountsOfKeystrokes,
+		 resetOneTimespanKeystrokesAmount, getThreeMostOftenPressedKeys, getMostOftenPressedKeysMessage, getKeystrokeCountAnalyticsMessage, incrementKeystrokesOfEveryTimespan, collectPressedKey, } from './libs/keystrokes_analytics';
 
-// Icons
-const KEYBOARD_ICON = '$(keyboard)';
-const FIRST_PLACE_ICON = '🥇';
-const SECOND_PLACE_ICON = '🥈';
-const THIRD_PLACE_ICON = '🥉';
+export var statusBarItem: vscode.StatusBarItem;
 
-// Time
-const SECOND_AS_MILLISECONDS = 1000;
-const MINUTE_AS_MILLISECONDS = SECOND_AS_MILLISECONDS * 60;
-const HOUR_AS_MILLISECONDS = MINUTE_AS_MILLISECONDS * 60;
-const DAY_AS_MILLISECONDS = HOUR_AS_MILLISECONDS * 24;
-const WEEK_AS_MILLISECONDS = DAY_AS_MILLISECONDS * 7;
-const MONTH_AS_MILLISECONDS = DAY_AS_MILLISECONDS * 30; // @todo: could be problematic
-const YEAR_AS_MILLISECONDS = MONTH_AS_MILLISECONDS * 12;
-
-/// general @todos:
-// - comment functions
-// - refactor code (with Neo for the best result I guess)
-// - create project-structure
-// - write read-me
-// - write changelog
-// - add cicd to project on github
-// - add feature to display the whole analytics of which keys were pressed in a json-file or something like this
-// - add feature to the keystroke-counts, etc.
-
-let statusBarItem: vscode.StatusBarItem;
-let pressedKeyMap = new Map<string, number>();
-let amountsOfKeystrokes = new Map<string, number>([
-	['second', KEYSTROKE_DEFAULT_VALUE],
-	['minute', KEYSTROKE_DEFAULT_VALUE],
-	['hour', KEYSTROKE_DEFAULT_VALUE],
-	['day', KEYSTROKE_DEFAULT_VALUE],
-	['week', KEYSTROKE_DEFAULT_VALUE],
-	['month', KEYSTROKE_DEFAULT_VALUE],
-	['year', KEYSTROKE_DEFAULT_VALUE],
-	['total', KEYSTROKE_DEFAULT_VALUE],
-]);
-let wpmWords = new Array<number>();
-let wordsPerMinute = 0;
-
-export function activate({ subscriptions }: vscode.ExtensionContext) {
-	const showKeystrokeCountAnalyticsCommandId = 'keystrokemanager.showKeystrokeCountAnalytics';
-	subscriptions.push(vscode.commands.registerCommand(showKeystrokeCountAnalyticsCommandId, () => {
-		const map = amountsOfKeystrokes;
-		const message = `You collected so far ${map.get('total')} keystrokes in total.
-						 ${map.get('year')} of them this year, 
-						 ${map.get('month')} this month, 
-						 ${map.get('week')} this week, 
-						 ${map.get('day')} today, 
-						 ${map.get('hour')} this hour and 
-						 ${map.get('minute')} this minute!`;
-
-		vscode.window.showInformationMessage(`😊 ${getPraisingWord()}! ${message}`);
-	}));
-
+export function activate({ subscriptions }: vscode.ExtensionContext): void {
+	// commands
+	const keystrokeCountAnalyticsCommandId = 'keystrokemanager.keystrokeCountAnalytics';
 	const mostOftenPressedKeysCommandId = 'keystrokemanager.mostOftenPressedKeys';
-	subscriptions.push(vscode.commands.registerCommand(mostOftenPressedKeysCommandId, () => {
-		const mostOftenPressedKeys = getMostOftenPressedKeys();
-		const message = printMostOftenPressedKeysMessage(mostOftenPressedKeys);
-
-		vscode.window.showInformationMessage(message);
-	}));
 	
-	const ITEM_PRIORITY = 101;
-	statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, ITEM_PRIORITY);
-	statusBarItem.command = showKeystrokeCountAnalyticsCommandId;
-	statusBarItem.text = `${KEYBOARD_ICON} Keystrokes: ${amountsOfKeystrokes.get('total')}`;
+	subscriptions.push(vscode.commands.registerCommand(keystrokeCountAnalyticsCommandId, keystrokeCountAnalyticsCommand));
+	subscriptions.push(vscode.commands.registerCommand(mostOftenPressedKeysCommandId, mostOftenPressedKeysCommand));
+	
+	// statusBarItem
+	const STATUS_BAR_ITEM_PRIORITY = 101;
+	statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, STATUS_BAR_ITEM_PRIORITY);
+	statusBarItem.command = keystrokeCountAnalyticsCommandId;
+	statusBarItem.text = `${KEYBOARD_ICON} Keystrokes: ${amountsOfKeystrokes.get('total')} | 0 WPM`;
+	// todo: add this in future
 	statusBarItem.tooltip = 'Select Timespan';
 	statusBarItem.show();
 	subscriptions.push(statusBarItem);
 
+	// change-detections
+	subscriptions.push(vscode.workspace.onDidChangeTextDocument(updateKeystrokes));
+	
+	// intervals
 	setInterval(() => {
-		const keystrokesPerSecond = amountsOfKeystrokes.get('second');
-
-		if(keystrokesPerSecond !== undefined) {
-			// keystrokesPerSecond / 5 -> one word is on average 5 chars long
-			// [...] * 60 -> estimation, that this rate is for the next 60 seconds
-			const tempWordsPerMinute = (keystrokesPerSecond / 5) * 60;
-			if(wpmWords.length === 60) {
-				wpmWords.shift();
-			}
-			wpmWords.push(tempWordsPerMinute);
-	
-			wordsPerMinute = wpmWords.reduce((prev, curr) => prev + curr) / wpmWords.length;
-			statusBarItem.text = `${KEYBOARD_ICON} Keystrokes: ${amountsOfKeystrokes.get('total')} | ${wordsPerMinute} WPM`;
-		}
-
-		resetOneAmountOfKeystrokes('second');
+		const wordsPerMinute = getAverageWordsPerMinute(amountsOfKeystrokes);
+		updateStatusBarItem(amountsOfKeystrokes.get('total'), wordsPerMinute);
+		
+		resetOneTimespanKeystrokesAmount('second');
 	}, SECOND_AS_MILLISECONDS);
-
-	setInterval(() => resetOneAmountOfKeystrokes('minute'), MINUTE_AS_MILLISECONDS);
-	setInterval(() => resetOneAmountOfKeystrokes('hour'), HOUR_AS_MILLISECONDS);
-	setInterval(() => resetOneAmountOfKeystrokes('day'), DAY_AS_MILLISECONDS);
-	setInterval(() => resetOneAmountOfKeystrokes('week'), WEEK_AS_MILLISECONDS);
-	setLongInterval(() => resetOneAmountOfKeystrokes('month'), MONTH_AS_MILLISECONDS);
-	setLongInterval(() => resetOneAmountOfKeystrokes('year'), YEAR_AS_MILLISECONDS);
-	
-	subscriptions.push(vscode.workspace.onDidChangeTextDocument((event: vscode.TextDocumentChangeEvent) => updateStatusBarItem(event)));
+	setInterval(() => resetOneTimespanKeystrokesAmount('minute'), MINUTE_AS_MILLISECONDS);
+	setInterval(() => resetOneTimespanKeystrokesAmount('hour'), HOUR_AS_MILLISECONDS);
+	setInterval(() => resetOneTimespanKeystrokesAmount('day'), DAY_AS_MILLISECONDS);
+	setInterval(() => resetOneTimespanKeystrokesAmount('week'), WEEK_AS_MILLISECONDS);
+	setLongInterval(() => resetOneTimespanKeystrokesAmount('month'), MONTH_AS_MILLISECONDS);
+	setLongInterval(() => resetOneTimespanKeystrokesAmount('year'), YEAR_AS_MILLISECONDS);
 }
 
-function updateStatusBarItem(event: vscode.TextDocumentChangeEvent): void {
-	// the last check is because of the first change in the document at the beginning 
-	// -> counted instantly to 2 before
-	if(event &&
-	   event.contentChanges &&
-	   event.contentChanges[0].text !== undefined) {
-		amountsOfKeystrokes.forEach((value, key, map) => map.set(key, value + 1));	
-		statusBarItem.text = `${KEYBOARD_ICON} Keystrokes: ${amountsOfKeystrokes.get('total')} | ${wordsPerMinute} WPM`;
+function keystrokeCountAnalyticsCommand(): void {
+	const message = getKeystrokeCountAnalyticsMessage();
 
+	vscode.window.showInformationMessage(`😊 ${getPraisingWord()}! ${message}`);
+}
+
+function mostOftenPressedKeysCommand(): void {
+	const mostOftenPressedKeys = getThreeMostOftenPressedKeys();	
+	const message = getMostOftenPressedKeysMessage(mostOftenPressedKeys);
+
+	vscode.window.showInformationMessage(message);
+}
+ 
+function updateKeystrokes(event: vscode.TextDocumentChangeEvent): void {
+	if(isValidChangedContent(event)) {
+		incrementKeystrokesOfEveryTimespan();
+		updateStatusBarItem(amountsOfKeystrokes.get('total'));
 		collectPressedKey(event);
 	}
-}
-
-function collectPressedKey(event: vscode.TextDocumentChangeEvent): void {
-	const pressedKey = event.contentChanges[0].text;
-	const prevCount = pressedKeyMap.get(pressedKey) ?? KEYSTROKE_DEFAULT_VALUE;
-
-	pressedKeyMap.set(pressedKey, prevCount + 1);
-}
-
-function getMostOftenPressedKeys(): Map<string, number> {
-	const pressedKeysSortedDescending = new Map([...pressedKeyMap].sort((prev, curr) => prev[1] - curr[1]).reverse());
-
-	const targetSize = 3;
-	const mostOftenPressedKeys = new Map([...pressedKeysSortedDescending].slice(0, targetSize));
-
-	return mostOftenPressedKeys;
-}
-
-function printMostOftenPressedKeysMessage(keyMap: Map<string, number>): string {
-	const messageBeginning = new String('You pressed');
-	let result = messageBeginning;
-
-	// @todo: beautify this code-piece!!! disgusting!
-	const placementIcons = new Map<number, string>([
-		[1, FIRST_PLACE_ICON],
-		[2, SECOND_PLACE_ICON],
-		[3, THIRD_PLACE_ICON],
-	]);
-	let placement = 1;
-	
-	keyMap.forEach((value, key, map) => {
-		const placementLine = new String(` ${placementIcons.get(placement++)} '${key}' ${value} times`);
-		result += placementLine.toString();
-	});
-	result += '!';
-
-	return result.toString();
-}
-
-function getPraisingWord(): string {
-	const WORDS = ['Awesome', 'Wonderful', 'Great', 'Fantastic', 'Cool'];
-	return WORDS[Math.floor(Math.random() * WORDS.length)];
-}
-
-const setLongInterval = (callback: any, timeout: number) => {
-    let count = 0;
-    const MAX_32_BIT_SIGNED = 2147483647;
-    const maxIterations = timeout / MAX_32_BIT_SIGNED;
-
-    const onInterval = () => {
-        ++count;
-        if (count > maxIterations) {
-            count = 0;
-            callback();
-        }
-    };
-
-    return setInterval(onInterval, Math.min(timeout, MAX_32_BIT_SIGNED));
-};
-
-function resetOneAmountOfKeystrokes(key: string): void {
-	console.log("here: " + key);
-	amountsOfKeystrokes.set(key, KEYSTROKE_DEFAULT_VALUE);
 }
