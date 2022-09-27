@@ -1,4 +1,3 @@
-var lastWordsPerMinuteValue = 0;
 const wordsPerMinuteEstimations = new Array<number>();
 
 // calculates a wpm-value based on an array, that remembers every value of the last 60 seconds
@@ -26,7 +25,7 @@ export function getEstimatedWordsPerMinuteBasedOnOneSecond(keystrokesPerSecond: 
 // -> only allowed to keep the last 60 seconds
 export function handleWordsPerMinuteEstimations(estimation: number): void {
     const REMEMBER_COUNT = 60;
-    
+
     if(wordsPerMinuteEstimations.length === REMEMBER_COUNT) {
         wordsPerMinuteEstimations.shift();
     }

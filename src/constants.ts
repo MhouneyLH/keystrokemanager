@@ -1,3 +1,5 @@
+// todo json für Konstanten
+
 // general
 export const KEYSTROKE_DEFAULT_VALUE = 0;
 export const KEYSTROKE_ERROR_VALUE = -1;
@@ -14,5 +16,5 @@ export const MINUTE_AS_MILLISECONDS = SECOND_AS_MILLISECONDS * 60;
 export const HOUR_AS_MILLISECONDS = MINUTE_AS_MILLISECONDS * 60;
 export const DAY_AS_MILLISECONDS = HOUR_AS_MILLISECONDS * 24;
 export const WEEK_AS_MILLISECONDS = DAY_AS_MILLISECONDS * 7;
-export const MONTH_AS_MILLISECONDS = DAY_AS_MILLISECONDS * 30; // @todo: could be problematic
+export const MONTH_AS_MILLISECONDS = DAY_AS_MILLISECONDS * 30; // todo: could be problematic
 export const YEAR_AS_MILLISECONDS = MONTH_AS_MILLISECONDS * 12;
