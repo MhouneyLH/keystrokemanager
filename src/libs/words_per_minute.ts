@@ -11,7 +11,9 @@ export function getAverageWordsPerMinute(keystrokes: Map<string, number>): numbe
     handleWordsPerMinuteEstimations(wordsPerMinuteEstimation);
 
     const averageWordsPerMinute = wordsPerMinuteEstimations.reduce((prev, curr) => prev + curr) / wordsPerMinuteEstimations.length;
-    return averageWordsPerMinute;
+    const roundedAverageWordsPerMinute = Number(averageWordsPerMinute.toFixed(2));
+    
+    return roundedAverageWordsPerMinute;
 }
 
 // calculates an estimation for the whole minute based on the second
