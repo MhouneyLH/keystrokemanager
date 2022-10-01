@@ -1,4 +1,4 @@
-const wordsPerMinuteEstimations = new Array<number>();
+var wordsPerMinuteEstimations = new Array<number>();
 
 // calculates a wpm-value based on an array, that remembers every value of the last 60 seconds
 export function getAverageWordsPerMinute(keystrokes: Map<string, number>): number {
@@ -8,11 +8,14 @@ export function getAverageWordsPerMinute(keystrokes: Map<string, number>): numbe
     }
 
     const wordsPerMinuteEstimation = getEstimatedWordsPerMinuteBasedOnOneSecond(keystrokesPerSecond);
+    console.log('estimation: ' + wordsPerMinuteEstimation);
     handleWordsPerMinuteEstimations(wordsPerMinuteEstimation);
+    console.log(wordsPerMinuteEstimations);
 
     const averageWordsPerMinute = wordsPerMinuteEstimations.reduce((prev, curr) => prev + curr) / wordsPerMinuteEstimations.length;
+    console.log('average: ' + averageWordsPerMinute);
     const roundedAverageWordsPerMinute = Number(averageWordsPerMinute.toFixed(2));
-    
+
     return roundedAverageWordsPerMinute;
 }
 
@@ -24,11 +27,11 @@ export function getEstimatedWordsPerMinuteBasedOnOneSecond(keystrokesPerSecond: 
 }
 
 // checks if there are too much estimations in the array
-// -> only allowed to keep the last 60 seconds
+// -> only allowed to keep the last 5 seconds
 export function handleWordsPerMinuteEstimations(estimation: number): void {
-    const REMEMBER_COUNT = 60;
+    const REMEMBER_VALUES_COUNT = 5;
 
-    if(wordsPerMinuteEstimations.length === REMEMBER_COUNT) {
+    if(wordsPerMinuteEstimations.length === REMEMBER_VALUES_COUNT) {
         wordsPerMinuteEstimations.shift();
     }
     wordsPerMinuteEstimations.push(estimation);
