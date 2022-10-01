@@ -40,7 +40,7 @@ Visual Studio Marketplace: @todo
 <p align="right">(<a href="#readme_top">back to top</a>)</p>
 
 ## 👨🏻‍💼 Contributing
-Contributions are always welcome! 😃 All you have to do is:
+Contributions are always welcome! Please look at following commit-conventions, while contributing: https://www.conventionalcommits.org/en/v1.0.0/#summary 😃
 
 1. Fork the project.
 2. Pick or create an [issue](https://github.com/MhouneyLH/keystrokemanager/issues) you want to work on.
