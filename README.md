@@ -1,71 +1,71 @@
-# keystrokemanager README
+<a name="readme_top"></a>
+# VSCode Keystrokemanager Extension
+[![Contributors][contributors_shield]][contributors_url]
+[![Forks][forks_shield]][forks_url]
+[![Stargazers][stars_shield]][stars_url]
+[![Issues][issues_shield]][issues_url]
+<br>
 
-This is the README for your extension "keystrokemanager". After writing up a brief description, we recommend including the following sections.
+![Typescript](https://img.shields.io/badge/TypeScript-007ACC)
+![](https://img.shields.io/badge/Made%20for-VSCode-1f425f.svg)
 
-## Features
-
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
-
-For example if there is an image subfolder under your extension project workspace:
-
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
-
-## Requirements
-
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
-
-## Extension Settings
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
+## 📑 About the project
 ---
+* tracking your keystrokes, while coding your projects
+* analytics, about which keys were pressed the most
+* showing your current WPM, that updates every second
+<p align="right">(<a href="#readme_top">back to top</a>)</p>
 
-## Following extension guidelines
+## 🔥 Features
+---
+## 👍🏻 Keep track of your total keystrokes and wpm
+![](./keystrokes_and_wpm.gif)
+## 👍🏻 Show analytics
+![](./commands_in_palette.png)
+![](./keystrokes_analytics.gif)
+![](./pressed_keys_analytics.gif)
+<p align="right">(<a href="#readme_top">back to top</a>)</p>
 
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
+## ☁ Download
+---
+Visual Studio Marketplace: @todo
+<p align="right">(<a href="#readme_top">back to top</a>)</p>
 
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
+## 🔢 Getting started
+---
+1. Clone the repository
+   ```sh
+   git clone https://github.com/MhouneyLH/keystrokemanager.git
+   ```
+2. Install the npm packages
+   ```sh
+   npm install
+   ```
+<p align="right">(<a href="#readme_top">back to top</a>)</p>
 
-## Working with Markdown
+## 👨🏻‍💼 Contributing
+---
+Contributions are always welcome! 😃 All you have to do is:
 
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
+1. Fork the project.
+2. Pick or create an [issue](https://github.com/MhouneyLH/keystrokemanager/issues) you want to work on.
+2. Create your Feature-Branch. (`git checkout -b feat/best_feature`)
+3. Commit your changes. (`git commit -m 'feat: add some cool feature'`)
+4. Push to the branch. (`git push origin feat/best_feature`)
+5. Open a Pull-Request into the Develop-Branch.
+<p align="right">(<a href="#readme_top">back to top</a>)</p>
 
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
+<!-- Links and Images -->
+[contributors_shield]: https://img.shields.io/github/contributors/MhouneyLH/keystrokemanager.svg?style=for-the-badge
+[contributors_url]: https://github.com/MhouneyLH/keystrokemanager/graphs/contributors
+[forks_shield]: https://img.shields.io/github/forks/MhouneyLH/keystrokemanager.svg?style=for-the-badge
+[forks_url]: https://github.com/MhouneyLH/keystrokemanager/network/members
+[stars_shield]: https://img.shields.io/github/stars/MhouneyLH/keystrokemanager.svg?style=for-the-badge
+[stars_url]: https://github.com/MhouneyLH/keystrokemanager/stargazers
+[issues_shield]: https://img.shields.io/github/issues/MhouneyLH/keystrokemanager.svg?style=for-the-badge
+[issues_url]: https://github.com/MhouneyLH/keystrokemanager/issues
 
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+[typescript_shield]: 
+[typescript_url]:
+[vscode_api_shield]:
+[vscode_api_url]:
