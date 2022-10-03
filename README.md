@@ -18,11 +18,11 @@
 
 ## 🔥 Features
 ### 👍🏻 Keep track of your total keystrokes and wpm
-![](./keystrokes_and_wpm.gif)
+![](./docs/keystrokes_and_wpm.gif)
 ### 👍🏻 Show analytics
-![](./commands_in_palette.png)
-![](./keystrokes_analytics.gif)
-![](./pressed_keys_analytics.gif)
+![](./docs/commands_in_palette.png)
+![](./docs/keystrokes_analytics.gif)
+![](./docs/pressed_keys_analytics.gif)
 <p align="right">(<a href="#readme_top">back to top</a>)</p>
 
 ## ☁ Download
