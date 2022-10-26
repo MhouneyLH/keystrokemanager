@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import { KEYSTROKE_DEFAULT_VALUE,
          FIRST_ICON, SECOND_ICON, THIRD_ICON, } from "../constants";
 
-interface IKeystrokeManager {
+export interface IKeystrokeManager {
 	second: number;
 	minute: number;
 	hour: number;

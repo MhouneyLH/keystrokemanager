@@ -22,6 +22,24 @@
       {
         "command": "keystrokemanager.mostOftenPressedKeys",
         "title": "Keystrokes: Show most often pressed keys"
+      },
+      {
+        "command": "keystrokemanager.savingTest",
+        "title": "Keystrokes: savingTest"
+      }
+    ],
+    "configuration": [
+      {
+        "keystrokeManager": {
+          "total": 0,
+          "year": 0,
+          "month": 0,
+          "week": 0,
+          "day": 0,
+          "hour": 0,
+          "minute": 0,
+          "second": 0
+        } 
       }
     ]
   },

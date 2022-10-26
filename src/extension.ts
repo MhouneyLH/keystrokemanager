@@ -14,9 +14,11 @@ export function activate({ subscriptions }: vscode.ExtensionContext): void {
 	// commands
 	const keystrokeCountAnalyticsCommandId = 'keystrokemanager.keystrokeCountAnalytics';
 	const mostOftenPressedKeysCommandId = 'keystrokemanager.mostOftenPressedKeys';
+	const savingTestCommandId = 'keystrokemanager.savingTest';
 	
 	subscriptions.push(vscode.commands.registerCommand(keystrokeCountAnalyticsCommandId, keystrokeCountAnalyticsCommand));
 	subscriptions.push(vscode.commands.registerCommand(mostOftenPressedKeysCommandId, mostOftenPressedKeysCommand));
+	subscriptions.push(vscode.commands.registerCommand(savingTestCommandId, savingTestCommand));
 	
 	// statusBarItem
 	const STATUS_BAR_ITEM_PRIORITY = 101;
@@ -56,6 +58,11 @@ function mostOftenPressedKeysCommand(): void {
 	const message = getMostOftenPressedKeysMessage(mostOftenPressedKeys);
 
 	vscode.window.showInformationMessage(message);
+}
+
+function savingTestCommand(): void {
+	const jsonObj = JSON.stringify(keystrokeManager);
+	console.log(jsonObj);
 }
  
 function updateKeystrokes(event: vscode.TextDocumentChangeEvent): void {

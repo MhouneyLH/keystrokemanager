@@ -5,11 +5,7 @@ You can reference the corresponding issue with the Pull-Request. Take a look at 
 Please make sure, that you follow these commit-conventions: https://www.conventionalcommits.org/en/v1.0.0/#summary 
 -->
 *
-*
-*
 
 # Other
 <!-- Here you can comment other thoughts, ideas or improvements for the future -->
-*
-*
 *
