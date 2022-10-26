@@ -14,7 +14,7 @@ export interface IKeystrokeManager {
 	total: number;
 }
 
-export const keystrokeManager: IKeystrokeManager = {
+export var keystrokeManager: IKeystrokeManager = {
 	second: KEYSTROKE_DEFAULT_VALUE,
 	minute: KEYSTROKE_DEFAULT_VALUE,
 	hour: KEYSTROKE_DEFAULT_VALUE,
@@ -117,4 +117,8 @@ export function resetOneTimespanKeystrokesAmount(key: string): void {
 		default:
 			break;
 	}
+}
+
+export function updateInterface(configuration: string): void {
+	keystrokeManager = JSON.parse(configuration);
 }

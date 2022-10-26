@@ -6,7 +6,7 @@ import { getPraisingWord, setLongInterval, } from './utils';
 import { updateStatusBarItem, isValidChangedContent, } from './vscode_utils';
 import { getAverageWordsPerMinute, } from './libs/words_per_minute';
 import { keystrokeManager,
-		 resetOneTimespanKeystrokesAmount, getThreeMostOftenPressedKeys, getMostOftenPressedKeysMessage, getKeystrokeCountAnalyticsMessage, incrementKeystrokesOfEveryTimespan, collectPressedKey, } from './libs/keystrokes_analytics';
+		 resetOneTimespanKeystrokesAmount, getThreeMostOftenPressedKeys, getMostOftenPressedKeysMessage, getKeystrokeCountAnalyticsMessage, incrementKeystrokesOfEveryTimespan, collectPressedKey, IKeystrokeManager, updateInterface, } from './libs/keystrokes_analytics';
 
 export var statusBarItem: vscode.StatusBarItem;
 
@@ -14,11 +14,13 @@ export function activate({ subscriptions }: vscode.ExtensionContext): void {
 	// commands
 	const keystrokeCountAnalyticsCommandId = 'keystrokemanager.keystrokeCountAnalytics';
 	const mostOftenPressedKeysCommandId = 'keystrokemanager.mostOftenPressedKeys';
-	const savingTestCommandId = 'keystrokemanager.savingTest';
+	const savingToConfigurationCommandId = 'keystrokemanager.savingToConfiguration';
+	const loadingFromConfigurationCommandId = 'keystrokemanager.loadingFromConfiguration';
 	
 	subscriptions.push(vscode.commands.registerCommand(keystrokeCountAnalyticsCommandId, keystrokeCountAnalyticsCommand));
 	subscriptions.push(vscode.commands.registerCommand(mostOftenPressedKeysCommandId, mostOftenPressedKeysCommand));
-	subscriptions.push(vscode.commands.registerCommand(savingTestCommandId, savingTestCommand));
+	subscriptions.push(vscode.commands.registerCommand(savingToConfigurationCommandId, savingToConfigurationCommand));
+	subscriptions.push(vscode.commands.registerCommand(loadingFromConfigurationCommandId, loadingFromConfigurationCommand));
 	
 	// statusBarItem
 	const STATUS_BAR_ITEM_PRIORITY = 101;
@@ -60,9 +62,15 @@ function mostOftenPressedKeysCommand(): void {
 	vscode.window.showInformationMessage(message);
 }
 
-function savingTestCommand(): void {
-	const jsonObj = JSON.stringify(keystrokeManager);
-	console.log(jsonObj);
+function loadingFromConfigurationCommand(): void {
+	const configuration = JSON.stringify(vscode.workspace.getConfiguration('keystrokeManager').get('keystrokes'));
+	updateInterface(configuration);
+	console.log(vscode.workspace.getConfiguration('keystrokeManager').get('keystrokes'));
+}
+
+function savingToConfigurationCommand(): void {
+	vscode.workspace.getConfiguration('keystrokeManager').update('keystrokes', keystrokeManager);
+	console.log(vscode.workspace.getConfiguration('keystrokeManager').get('keystrokes'));
 }
  
 function updateKeystrokes(event: vscode.TextDocumentChangeEvent): void {
