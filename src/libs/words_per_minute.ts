@@ -1,19 +1,18 @@
+import { IKeystrokeManager } from './keystrokes_analytics';
+
 var wordsPerMinuteEstimations = new Array<number>();
 
 // calculates a wpm-value based on an array, that remembers every value of the last 60 seconds
-export function getAverageWordsPerMinute(keystrokes: Map<string, number>): number {
-    const keystrokesPerSecond = keystrokes.get('second');
+export function getAverageWordsPerMinute(keystrokeManager: IKeystrokeManager): number {
+    const keystrokesPerSecond = keystrokeManager.second;
     if(keystrokesPerSecond === undefined) {
         return 0;
     }
 
     const wordsPerMinuteEstimation = getEstimatedWordsPerMinuteBasedOnOneSecond(keystrokesPerSecond);
-    console.log('estimation: ' + wordsPerMinuteEstimation);
     handleWordsPerMinuteEstimations(wordsPerMinuteEstimation);
-    console.log(wordsPerMinuteEstimations);
 
     const averageWordsPerMinute = wordsPerMinuteEstimations.reduce((prev, curr) => prev + curr) / wordsPerMinuteEstimations.length;
-    console.log('average: ' + averageWordsPerMinute);
     const roundedAverageWordsPerMinute = Number(averageWordsPerMinute.toFixed(2));
 
     return roundedAverageWordsPerMinute;

@@ -5,7 +5,7 @@ import { KEYBOARD_ICON,
 import { getPraisingWord, setLongInterval, } from './utils';
 import { updateStatusBarItem, isValidChangedContent, } from './vscode_utils';
 import { getAverageWordsPerMinute, } from './libs/words_per_minute';
-import { amountsOfKeystrokes,
+import { keystrokeManager,
 		 resetOneTimespanKeystrokesAmount, getThreeMostOftenPressedKeys, getMostOftenPressedKeysMessage, getKeystrokeCountAnalyticsMessage, incrementKeystrokesOfEveryTimespan, collectPressedKey, } from './libs/keystrokes_analytics';
 
 export var statusBarItem: vscode.StatusBarItem;
@@ -22,8 +22,7 @@ export function activate({ subscriptions }: vscode.ExtensionContext): void {
 	const STATUS_BAR_ITEM_PRIORITY = 101;
 	statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, STATUS_BAR_ITEM_PRIORITY);
 	statusBarItem.command = keystrokeCountAnalyticsCommandId;
-	statusBarItem.text = `${KEYBOARD_ICON} Keystrokes: ${amountsOfKeystrokes.get('total')} | 0 WPM`;
-	// todo: add this in future
+	statusBarItem.text = `${KEYBOARD_ICON} Keystrokes: ${keystrokeManager.total} | 0 WPM`;
 	statusBarItem.tooltip = 'Select Timespan';
 	statusBarItem.show();
 	subscriptions.push(statusBarItem);
@@ -33,8 +32,8 @@ export function activate({ subscriptions }: vscode.ExtensionContext): void {
 	
 	// intervals
 	setInterval(() => {
-		const wordsPerMinute = getAverageWordsPerMinute(amountsOfKeystrokes);
-		updateStatusBarItem(amountsOfKeystrokes.get('total'), wordsPerMinute);
+		const wordsPerMinute = getAverageWordsPerMinute(keystrokeManager);
+		updateStatusBarItem(keystrokeManager.total, wordsPerMinute);
 		
 		resetOneTimespanKeystrokesAmount('second');
 	}, SECOND_AS_MILLISECONDS);
@@ -62,7 +61,7 @@ function mostOftenPressedKeysCommand(): void {
 function updateKeystrokes(event: vscode.TextDocumentChangeEvent): void {
 	if(isValidChangedContent(event)) {
 		incrementKeystrokesOfEveryTimespan();
-		updateStatusBarItem(amountsOfKeystrokes.get('total'));
+		updateStatusBarItem(keystrokeManager.total);
 		collectPressedKey(event);
 	}
 }

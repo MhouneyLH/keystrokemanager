@@ -3,36 +3,39 @@ import * as vscode from 'vscode';
 import { KEYSTROKE_DEFAULT_VALUE,
          FIRST_ICON, SECOND_ICON, THIRD_ICON, } from "../constants";
 
-// todo: using interfaces instead of maps
-// interface für Datenstruktur von map verwenden
-// damit kann ich das auch in json speichern
-// test = {
-// 	key: 5;
-// };
-// test['key'];
+interface IKeystrokeManager {
+	second: number;
+	minute: number;
+	hour: number;
+	day: number;
+	week: number;
+	month: number;
+	year: number;
+	total: number;
+}
 
-export const amountsOfKeystrokes = new Map<string, number>([
-    ['second', KEYSTROKE_DEFAULT_VALUE],
-    ['minute', KEYSTROKE_DEFAULT_VALUE],
-    ['hour', KEYSTROKE_DEFAULT_VALUE],
-    ['day', KEYSTROKE_DEFAULT_VALUE],
-    ['week', KEYSTROKE_DEFAULT_VALUE],
-    ['month', KEYSTROKE_DEFAULT_VALUE],
-    ['year', KEYSTROKE_DEFAULT_VALUE],
-    ['total', KEYSTROKE_DEFAULT_VALUE],
-]);
+export const keystrokeManager: IKeystrokeManager = {
+	second: KEYSTROKE_DEFAULT_VALUE,
+	minute: KEYSTROKE_DEFAULT_VALUE,
+	hour: KEYSTROKE_DEFAULT_VALUE,
+	day: KEYSTROKE_DEFAULT_VALUE,
+	week: KEYSTROKE_DEFAULT_VALUE,
+	month: KEYSTROKE_DEFAULT_VALUE,
+	year: KEYSTROKE_DEFAULT_VALUE,
+	total: KEYSTROKE_DEFAULT_VALUE,
+};
 const pressedKeys = new Map<string, number>();
 
 // message for the keystrokeCountAnalyticsCommand
 export function getKeystrokeCountAnalyticsMessage(): string {
-    const keystrokes = amountsOfKeystrokes;
-    const message = `You collected so far ${keystrokes.get('total')} keystrokes in total.
-					${keystrokes.get('year')} of them this year, 
-					${keystrokes.get('month')} this month, 
-					${keystrokes.get('week')} this week, 
-					${keystrokes.get('day')} today, 
-					${keystrokes.get('hour')} this hour and 
-					${keystrokes.get('minute')} this minute!`;
+    const keystrokes = keystrokeManager;
+    const message = `You collected so far ${keystrokes.total} keystrokes in total.
+					${keystrokes.year} of them this year, 
+					${keystrokes.month} this month, 
+					${keystrokes.week} this week, 
+					${keystrokes.day} today, 
+					${keystrokes.hour} this hour and 
+					${keystrokes.minute} this minute!`;
 
     return message;
 }
@@ -74,10 +77,44 @@ export function getThreeMostOftenPressedKeys(): Map<string, number> {
 
 // the count of every map-item is incremented
 export function incrementKeystrokesOfEveryTimespan(): void {
-	amountsOfKeystrokes.forEach((value, key, map) => map.set(key, value + 1));	
+	++keystrokeManager.total;
+	++keystrokeManager.year;
+	++keystrokeManager.month;
+	++keystrokeManager.week;
+	++keystrokeManager.day;
+	++keystrokeManager.hour;
+	++keystrokeManager.minute;
+	++keystrokeManager.second;
 }
 
 // the count of one specific map-item is resetted based on the key
 export function resetOneTimespanKeystrokesAmount(key: string): void {
-	amountsOfKeystrokes.set(key, KEYSTROKE_DEFAULT_VALUE);
+	switch(key) {
+		case 'total':
+			keystrokeManager.total = KEYSTROKE_DEFAULT_VALUE;
+			break;
+		case 'year':
+			keystrokeManager.year = KEYSTROKE_DEFAULT_VALUE;
+			break;
+		case 'month':
+			keystrokeManager.month = KEYSTROKE_DEFAULT_VALUE;
+			break;
+		case 'week':
+			keystrokeManager.week = KEYSTROKE_DEFAULT_VALUE;
+			break;
+		case 'day':
+			keystrokeManager.day = KEYSTROKE_DEFAULT_VALUE;
+			break;
+		case 'hour':
+			keystrokeManager.hour = KEYSTROKE_DEFAULT_VALUE;
+			break;
+		case 'minute':
+			keystrokeManager.minute = KEYSTROKE_DEFAULT_VALUE;
+			break;
+		case 'second':
+			keystrokeManager.second = KEYSTROKE_DEFAULT_VALUE;
+			break;
+		default:
+			break;
+	}
 }
