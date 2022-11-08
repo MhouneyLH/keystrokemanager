@@ -11,6 +11,8 @@ import { keystrokeManager,
 export var statusBarItem: vscode.StatusBarItem;
 
 export function activate({ subscriptions }: vscode.ExtensionContext): void {
+	loadingFromConfigurationCommand();
+	
 	// commands
 	const keystrokeCountAnalyticsCommandId = 'keystrokemanager.keystrokeCountAnalytics';
 	const mostOftenPressedKeysCommandId = 'keystrokemanager.mostOftenPressedKeys';
@@ -30,7 +32,7 @@ export function activate({ subscriptions }: vscode.ExtensionContext): void {
 	statusBarItem.tooltip = 'Select Timespan';
 	statusBarItem.show();
 	subscriptions.push(statusBarItem);
-
+	
 	// change-detections
 	subscriptions.push(vscode.workspace.onDidChangeTextDocument(updateKeystrokes));
 	
@@ -40,6 +42,7 @@ export function activate({ subscriptions }: vscode.ExtensionContext): void {
 		updateStatusBarItem(keystrokeManager.total, wordsPerMinute);
 		
 		resetOneTimespanKeystrokesAmount('second');
+		//savingToConfigurationCommand();
 	}, SECOND_AS_MILLISECONDS);
 	setInterval(() => resetOneTimespanKeystrokesAmount('minute'), MINUTE_AS_MILLISECONDS);
 	setInterval(() => resetOneTimespanKeystrokesAmount('hour'), HOUR_AS_MILLISECONDS);
@@ -65,11 +68,13 @@ function mostOftenPressedKeysCommand(): void {
 function loadingFromConfigurationCommand(): void {
 	const configuration = JSON.stringify(vscode.workspace.getConfiguration('keystrokeManager').get('keystrokes'));
 	updateInterface(configuration);
+	console.log("Loading:");
 	console.log(vscode.workspace.getConfiguration('keystrokeManager').get('keystrokes'));
 }
 
 function savingToConfigurationCommand(): void {
 	vscode.workspace.getConfiguration('keystrokeManager').update('keystrokes', keystrokeManager);
+	console.log("Saving:");
 	console.log(vscode.workspace.getConfiguration('keystrokeManager').get('keystrokes'));
 }
  
